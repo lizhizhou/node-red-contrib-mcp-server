@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MadnessEngineering/node-red-contrib-mcp-server.git"
+    "url": "git+https://github.com/DanEdens/node-red-contrib-mcp-server.git"
   },
   "keywords": [
     "node-red",
@@ -32,9 +32,9 @@
   "author": "D. Edens <d.edens@todomill.dev>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MadnessEngineering/node-red-contrib-mcp-server/issues"
+    "url": "https://github.com/DanEdens/node-red-contrib-mcp-server/issues"
   },
-  "homepage": "https://github.com/MadnessEngineering/node-red-contrib-mcp-server#readme",
+  "homepage": "https://github.com/DanEdens/node-red-contrib-mcp-server#readme",
   "node-red": {
     "nodes": {
       "mcp-server": "mcp-server.js",
