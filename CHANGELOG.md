@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2024-12-28
+
+### Added - Visual MCP Server Creation
+- **MCP Flow Server Node**: Create complete MCP servers entirely within Node-RED
+  - Full MCP protocol implementation (JSON-RPC 2.0)
+  - Standard MCP endpoints: /mcp, /health, /sse
+  - Tool registration and execution management
+  - CORS support for web browser clients
+  - Real-time Server-Sent Events streaming
+  - Auto-start and port configuration
+  - Global tool registry across server instances
+
+- **MCP Tool Registry Node**: Define MCP tools using visual configuration
+  - JSON Schema-based parameter definition
+  - Built-in schema templates (Todo, Calculator, API, Simple)
+  - Auto-registration and dynamic updates
+  - Tool validation and formatting
+  - Quick tool generation buttons
+  - Template-based tool creation
+
+- **Enhanced Capabilities**:
+  - Complete visual alternative to coding MCP servers
+  - No-code tool creation with drag-and-drop interface
+  - Rapid prototyping of AI agent tools
+  - Integration with existing Node-RED flows as tools
+  - Real-time tool registry management
+
+### Enhanced
+- Added Express.js dependency for HTTP server functionality
+- Updated package keywords for better discoverability
+- Improved documentation with visual programming examples
+
+### Use Cases Added
+- **Rapid Prototyping**: Create and test MCP tools without writing code
+- **Business Logic Integration**: Expose Node-RED flows as AI agent tools
+- **Custom Automation**: Turn automation workflows into MCP tools
+- **API Aggregation**: Combine multiple APIs into single MCP tools
+- **Educational**: Learn MCP concepts through visual programming
+
+### Technical Details - v1.1.0
+- New dependencies: express ^4.18.0
+- Two new node types: mcp-flow-server, mcp-tool-registry
+- Global tool registry with event-based communication
+- Standard MCP protocol compliance
+- WebSocket and SSE support for real-time communication
+
 ## [1.0.0] - 2024-12-28
 
 ### Added
