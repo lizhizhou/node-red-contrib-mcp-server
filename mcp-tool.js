@@ -163,6 +163,12 @@ module.exports = function (RED)
     {
         const serverUrl = decodeURIComponent(req.params.serverUrl);
 
+        // Validate the server URL
+        if (!serverUrl || !serverUrl.startsWith('http'))
+        {
+            return res.status(400).json({ error: "Invalid server URL" });
+        }
+
         const request = {
             jsonrpc: "2.0",
             id: Date.now(),
@@ -170,15 +176,24 @@ module.exports = function (RED)
             params: {}
         };
 
+        RED.log.debug(`MCP Tool: Requesting tools from ${serverUrl}`);
+
         axios.post(`${serverUrl}/mcp`, request, {
             timeout: 10000,
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
         })
             .then(response =>
             {
+                RED.log.debug(`MCP Tool: Received response from ${serverUrl}`);
                 if (response.data && response.data.result && response.data.result.tools)
                 {
                     res.json({ tools: response.data.result.tools });
+                } else if (response.data && response.data.error)
+                {
+                    res.status(500).json({ error: `MCP Server Error: ${response.data.error.message || 'Unknown error'}` });
                 } else
                 {
                     res.json({ tools: [] });
@@ -186,7 +201,21 @@ module.exports = function (RED)
             })
             .catch(error =>
             {
-                res.status(500).json({ error: error.message });
+                RED.log.error(`MCP Tool: Error requesting tools from ${serverUrl}: ${error.message}`);
+
+                let errorMessage = error.message;
+                if (error.code === 'ECONNREFUSED')
+                {
+                    errorMessage = "Connection refused. Ensure the MCP server is running.";
+                } else if (error.code === 'ENOTFOUND')
+                {
+                    errorMessage = "Server not found. Check the URL.";
+                } else if (error.response)
+                {
+                    errorMessage = `Server responded with ${error.response.status}: ${error.response.statusText}`;
+                }
+
+                res.status(500).json({ error: errorMessage });
             });
     });
 }; 

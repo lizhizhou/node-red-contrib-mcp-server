@@ -35,6 +35,30 @@ cd ~/.node-red
 npm link node-red-contrib-mcp-server
 ```
 
+## Quick Start with Examples
+
+The package includes ready-to-use example flows to get you started quickly:
+
+### 📁 External MCP Server Example
+Demonstrates connecting to external MCP servers like Omnispindle:
+- **File**: `examples/external-mcp-server-example.json`
+- **Shows**: SSE connection, tool discovery, direct tool calls
+- **Setup**: Import → Deploy → Watch debug output
+
+### 🏗️ Flow-Based MCP Server Example  
+Demonstrates creating MCP servers entirely within Node-RED:
+- **File**: `examples/flow-based-mcp-server-example.json`
+- **Shows**: Custom tools, visual server creation, self-testing
+- **Setup**: Import → Deploy → Server runs on port 8001
+
+### How to Import Examples
+1. In Node-RED: Menu (☰) → Import
+2. Select "select a file to import"  
+3. Choose an example JSON file from the `examples/` directory
+4. Click "Import" and deploy
+
+For detailed setup instructions, see [`examples/README.md`](examples/README.md).
+
 ## Nodes
 
 ### 🖥️ MCP Server Node

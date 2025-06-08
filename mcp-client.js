@@ -125,6 +125,12 @@ module.exports = function (RED)
                     });
 
                     callback(null, { success: true, message: "SSE connection established" });
+
+                    // Automatically fetch MCP handshake information
+                    setTimeout(() =>
+                    {
+                        node.fetchMCPHandshake();
+                    }, 500); // Small delay to ensure connection is fully established
                 };
 
                 node.connection.onmessage = function (event)
@@ -184,6 +190,133 @@ module.exports = function (RED)
             }
         };
 
+        // Fetch MCP handshake information (tools, capabilities, server info)
+        node.fetchMCPHandshake = function ()
+        {
+            if (!node.isConnected)
+            {
+                return;
+            }
+
+            node.log("Fetching MCP handshake information...");
+
+            // First, initialize the MCP session
+            node.sendRequest("initialize", {
+                protocolVersion: "2024-11-05",
+                capabilities: {
+                    tools: {}
+                },
+                clientInfo: {
+                    name: "node-red-mcp-client",
+                    version: "1.1.0"
+                }
+            }, (error, initResponse) =>
+            {
+                if (error)
+                {
+                    node.warn(`Failed to initialize MCP session: ${error.message}`);
+                    return;
+                }
+
+                // Send initialization response as handshake info
+                node.send({
+                    topic: "handshake",
+                    payload: {
+                        type: "initialization",
+                        serverInfo: initResponse.result || initResponse,
+                        timestamp: new Date().toISOString()
+                    }
+                });
+
+                // Then fetch available tools
+                node.sendRequest("tools/list", {}, (error, toolsResponse) =>
+                {
+                    if (error)
+                    {
+                        node.warn(`Failed to fetch tools list: ${error.message}`);
+                        return;
+                    }
+
+                    const tools = toolsResponse.result?.tools || toolsResponse.tools || [];
+
+                    // Send comprehensive handshake information
+                    node.send({
+                        topic: "handshake",
+                        payload: {
+                            type: "tools_discovered",
+                            serverUrl: node.serverUrl,
+                            connectionType: node.connectionType,
+                            serverInfo: initResponse.result || initResponse,
+                            availableTools: tools,
+                            toolCount: tools.length,
+                            toolNames: tools.map(tool => tool.name),
+                            timestamp: new Date().toISOString(),
+                            mcpSyntax: {
+                                requestFormat: {
+                                    topic: "request",
+                                    payload: {
+                                        method: "tool_name_here",
+                                        params: "tool_parameters_object"
+                                    }
+                                },
+                                exampleCall: tools.length > 0 ? {
+                                    topic: "request",
+                                    payload: {
+                                        method: tools[0].name,
+                                        params: node.generateExampleParams(tools[0].inputSchema)
+                                    }
+                                } : null
+                            }
+                        }
+                    });
+
+                    node.log(`MCP handshake complete: found ${tools.length} tools`);
+                });
+            });
+        };
+
+        // Generate example parameters from JSON schema
+        node.generateExampleParams = function (schema)
+        {
+            if (!schema || !schema.properties)
+            {
+                return {};
+            }
+
+            const example = {};
+            for (const [propName, propDef] of Object.entries(schema.properties))
+            {
+                switch (propDef.type)
+                {
+                    case "string":
+                        if (propDef.enum)
+                        {
+                            example[propName] = propDef.enum[0];
+                        } else
+                        {
+                            example[propName] = propDef.description || "example_string";
+                        }
+                        break;
+                    case "number":
+                    case "integer":
+                        example[propName] = 123;
+                        break;
+                    case "boolean":
+                        example[propName] = true;
+                        break;
+                    case "object":
+                        example[propName] = {};
+                        break;
+                    case "array":
+                        example[propName] = [];
+                        break;
+                    default:
+                        example[propName] = propDef.description || "example_value";
+                }
+            }
+            return example;
+        };
+
         // WebSocket connection
         node.connectWebSocket = function (callback)
         {
@@ -207,6 +340,12 @@ module.exports = function (RED)
                     });
 
                     callback(null, { success: true, message: "WebSocket connection established" });
+
+                    // Automatically fetch MCP handshake information
+                    setTimeout(() =>
+                    {
+                        node.fetchMCPHandshake();
+                    }, 500); // Small delay to ensure connection is fully established
                 });
 
                 node.connection.on('message', function (data)

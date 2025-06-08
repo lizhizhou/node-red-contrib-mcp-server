@@ -26,7 +26,10 @@
             // Load available tools from server
             function loadAvailableTools() {
                 var serverUrl = $("#node-input-serverUrl").val();
-                if (!serverUrl) return;
+                if (!serverUrl) {
+                    RED.notify("Server URL is required", "error");
+                    return;
+                }
 
                 var button = $("#load-tools-btn");
                 var select = $("#node-input-toolName");
@@ -34,12 +37,16 @@
                 
                 button.text("Loading...").prop('disabled', true);
                 
+                // Properly encode the URL for the REST endpoint
                 var encodedUrl = encodeURIComponent(serverUrl);
                 
                 $.ajax({
-                    url: `mcp-tools/${encodedUrl}`,
+                    url: "mcp-tools/" + encodedUrl,
                     method: "GET",
-                    timeout: 10000
+                    timeout: 10000,
+                    headers: {
+                        "Accept": "application/json"
+                    }
                 })
                 .done(function(data) {
                     // Clear existing options (except the first placeholder)
@@ -58,7 +65,23 @@
                     }
                 })
                 .fail(function(xhr, status, error) {
-                    RED.notify(`Failed to load tools: ${error || status}`, "error");
+                    var errorMsg = "Failed to load tools";
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg += ": " + xhr.responseJSON.error;
+                    } else if (error) {
+                        errorMsg += ": " + error;
+                    } else if (status) {
+                        errorMsg += ": " + status;
+                    }
+                    
+                    // Check if it's a connection issue
+                    if (xhr.status === 0 || status === "timeout") {
+                        errorMsg = "Cannot connect to server. Ensure the MCP server is running.";
+                    } else if (xhr.status === 500) {
+                        errorMsg = "Server error. Check that the MCP server supports tools/list.";
+                    }
+                    
+                    RED.notify(errorMsg, "error");
                 })
                 .always(function() {
                     button.text(originalText).prop('disabled', false);
@@ -78,6 +101,7 @@
             // Omnispindle tool presets
             var omnispindleTools = [
                 { name: "add_todo_tool", params: '{"description": "", "project": ""}' },
+                { name: "get_todo_tool", params: '{"todo_id": ""}' },
                 { name: "list_todos_by_status_tool", params: '{"status": "pending"}' },
                 { name: "update_todo_tool", params: '{"todo_id": "", "updates": {}}' },
                 { name: "delete_todo_tool", params: '{"todo_id": ""}' },

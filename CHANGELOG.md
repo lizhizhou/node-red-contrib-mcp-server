@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2024-12-28
+
+### Added
+- **MCP Tool Node**: Added `get_todo_tool` to Omnispindle presets
+  - Completes the standard todo management operations
+  - Default parameter: `{"todo_id": ""}`
+  - Now includes all essential todo operations in quick setup
+
+### Fixed
+- **MCP Tool Node**: Enhanced error handling for tool loading
+  - Better error messages for connection failures
+  - Improved debugging with specific error types
+  - Added validation for server URLs
+  - More user-friendly error descriptions
+  - Fixed potential issues with URL encoding in admin endpoints
+
+## [1.1.2] - 2024-12-28
+
+### Fixed - Critical Bug Fix
+- **MCP Flow Server Node**: Fixed "Cannot assign to read only property 'writeQueueSize'" error
+  - Issue occurred when caching server instances containing Node-RED internal objects
+  - Solution: Only cache essential data instead of entire node object with TCP connections
+  - Prevents uncaught exceptions that could crash Node-RED
+  - Maintains full functionality while improving stability
+
+### Technical Details
+- Removed caching of entire node object in serverInstances cache
+- Now only stores: nodeId, serverName, port, startTime, isRunning status
+- Updated admin endpoint to work with simplified cache structure
+- Tool execution continues to work normally as it uses node object directly
+
+## [1.1.1] - 2024-12-28
+
+### Added - Automatic MCP Handshake Discovery
+- **MCP Client Node**: Automatic tool discovery for SSE and WebSocket connections
+  - Automatically performs MCP handshake on connection
+  - Outputs server capabilities and available tools via "handshake" topic
+  - Includes tool names, descriptions, and parameter schemas
+  - Provides example syntax for discovered tools
+  - Includes tool count and server information
+  - Perfect for debugging and understanding available MCP tools
+
+### Enhanced
+- **Better Debugging Experience**: Users can now see exactly what tools are available immediately after connecting
+- **Auto-Discovery**: No need to manually request tools/list - happens automatically
+- **Example Generation**: Automatically generates example parameters from tool schemas
+- **Comprehensive Output**: Includes both server info and practical usage examples
+- **Ready-to-Use Examples**: Added comprehensive example flows for quick start
+  - External MCP Server example demonstrating client connections
+  - Flow-Based MCP Server example showing visual server creation
+  - Complete documentation and setup instructions
+
+### Use Cases Enhanced
+- **Rapid Development**: Instantly see available tools and their syntax
+- **Debugging**: Understand server capabilities and tool interfaces
+- **Tool Discovery**: Automatically discover new tools without manual requests
+- **Integration Testing**: Verify expected tools are available
+
 ## [1.1.0] - 2024-12-28
 
 ### Added - Visual MCP Server Creation
@@ -103,4 +161,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time communication and event streaming
 - Built-in Omnispindle MCP server integration
 - Dynamic tool discovery and configuration
-- Comprehensive documentation and examples 
+- Comprehensive documentation and examples

@@ -347,9 +347,11 @@ module.exports = function (RED)
 
                     // Store in global registry
                     serverInstances.set(node.serverId, {
-                        node: node,
+                        nodeId: node.id,
+                        serverName: node.serverName,
                         port: node.serverPort,
-                        startTime: new Date()
+                        startTime: new Date(),
+                        isRunning: true
                     });
 
                     node.log(`MCP Flow Server started on port ${node.serverPort}`);
@@ -496,8 +498,8 @@ module.exports = function (RED)
             {
                 servers.push({
                     serverId: key,
-                    serverName: server.node.serverName,
-                    isRunning: server.node.isRunning,
+                    serverName: server.serverName,
+                    isRunning: server.isRunning,
                     port: server.port,
                     startTime: server.startTime,
                     toolCount: toolRegistry.keys().length

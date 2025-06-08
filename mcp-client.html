@@ -56,7 +56,7 @@
             // Initialize form
             updateConnectionTypeInfo();
 
-            // Test connection button
+            // Test connection button with type-specific testing
             $("#test-connection-btn").click(function() {
                 var button = $(this);
                 var originalText = button.text();
@@ -71,20 +71,87 @@
                     return;
                 }
 
-                // Simple health check
-                $.ajax({
-                    url: serverUrl + "/health",
-                    method: "GET",
-                    timeout: 5000
-                })
-                .done(function(data) {
+                function resetButton() {
                     button.text(originalText).prop('disabled', false);
-                    RED.notify("Connection successful! Server is reachable.", "success");
-                })
-                .fail(function(xhr, status, error) {
-                    button.text(originalText).prop('disabled', false);
-                    RED.notify(`Connection failed: ${error || status}`, "error");
-                });
+                }
+
+                // Test based on connection type
+                switch (connectionType) {
+                    case "http":
+                        // Test HTTP with health check
+                        $.ajax({
+                            url: serverUrl + "/health",
+                            method: "GET",
+                            timeout: 5000
+                        })
+                        .done(function(data) {
+                            resetButton();
+                            RED.notify("HTTP connection successful! Server is reachable.", "success");
+                        })
+                        .fail(function(xhr, status, error) {
+                            resetButton();
+                            RED.notify(`HTTP connection failed: ${error || status}`, "error");
+                        });
+                        break;
+
+                    case "sse":
+                        // Test SSE connection
+                        var sseUrl = serverUrl + "/sse";
+                        var eventSource = new EventSource(sseUrl);
+                        var sseTimeout = setTimeout(function() {
+                            eventSource.close();
+                            resetButton();
+                            RED.notify("SSE connection timeout - server may not support SSE", "warning");
+                        }, 5000);
+
+                        eventSource.onopen = function(event) {
+                            clearTimeout(sseTimeout);
+                            eventSource.close();
+                            resetButton();
+                            RED.notify("SSE connection successful! Real-time streaming available.", "success");
+                        };
+
+                        eventSource.onerror = function(event) {
+                            clearTimeout(sseTimeout);
+                            eventSource.close();
+                            resetButton();
+                            RED.notify("SSE connection failed - check server SSE support", "error");
+                        };
+                        break;
+
+                    case "websocket":
+                        // Test WebSocket connection
+                        var wsUrl = serverUrl.replace(/^http/, 'ws') + '/ws';
+                        try {
+                            var ws = new WebSocket(wsUrl);
+                            var wsTimeout = setTimeout(function() {
+                                ws.close();
+                                resetButton();
+                                RED.notify("WebSocket connection timeout - server may not support WebSockets", "warning");
+                            }, 5000);
+
+                            ws.onopen = function(event) {
+                                clearTimeout(wsTimeout);
+                                ws.close();
+                                resetButton();
+                                RED.notify("WebSocket connection successful! Full-duplex communication available.", "success");
+                            };
+
+                            ws.onerror = function(event) {
+                                clearTimeout(wsTimeout);
+                                resetButton();
+                                RED.notify("WebSocket connection failed - check server WebSocket support", "error");
+                            };
+                        } catch (error) {
+                            resetButton();
+                            RED.notify("WebSocket connection failed: " + error.message, "error");
+                        }
+                        break;
+
+                    default:
+                        resetButton();
+                        RED.notify("Unknown connection type", "error");
+                }
             });
 
             // Load Omnispindle preset
@@ -217,6 +284,14 @@
         <dd>Bidirectional real-time communication. Best for interactive applications.</dd>
     </dl>
 
+    <h3>Test Connection</h3>
+    <p>The Test Connection button now performs connection type-specific testing:</p>
+    <ul>
+        <li><strong>HTTP:</strong> Tests /health endpoint with GET request</li>
+        <li><strong>SSE:</strong> Attempts to establish Server-Sent Events connection to /sse</li>
+        <li><strong>WebSocket:</strong> Attempts to establish WebSocket connection to /ws</li>
+    </ul>
+
     <h3>Input Commands</h3>
     <p>Send messages with the following topics to control the client:</p>
     <dl class="message-properties">
@@ -239,6 +314,9 @@
         <dt>connected <span class="property-type">object</span></dt>
         <dd>Connection established successfully</dd>
         
+        <dt>handshake <span class="property-type">object</span></dt>
+        <dd>MCP server capabilities and available tools (SSE and WebSocket)</dd>
+        
         <dt>response <span class="property-type">object</span></dt>
         <dd>Response from MCP server to a request</dd>
         
@@ -251,6 +329,50 @@
         <dt>raw <span class="property-type">string</span></dt>
         <dd>Raw message that couldn't be parsed as JSON</dd>
     </dl>
+
+    <h3>Handshake Information (SSE & WebSocket)</h3>
+    <p>When using Server-Sent Events or WebSocket, the client automatically performs an MCP handshake and outputs discovery information:</p>
+    <pre><code>{
+    "topic": "handshake",
+    "payload": {
+        "type": "tools_discovered",
+        "serverUrl": "http://localhost:8000",
+        "connectionType": "sse",
+        "serverInfo": {
+            "name": "omnispindle-mcp",
+            "version": "1.0.0",
+            "capabilities": {...}
+        },
+        "availableTools": [
+            {
+                "name": "add_todo_tool",
+                "description": "Create a new todo item",
+                "inputSchema": {...}
+            }
+        ],
+        "toolCount": 12,
+        "toolNames": ["add_todo_tool", "list_todos_tool", ...],
+        "mcpSyntax": {
+            "requestFormat": {
+                "topic": "request",
+                "payload": {
+                    "method": "tool_name_here",
+                    "params": {...}
+                }
+            },
+            "exampleCall": {
+                "topic": "request", 
+                "payload": {
+                    "method": "add_todo_tool",
+                    "params": {
+                        "description": "example_string",
+                        "project": "Omnispindle"
+                    }
+                }
+            }
+        }
+    }
+}</code></pre>
 
     <h3>MCP Request Format</h3>
     <p>To send MCP requests, use the following message format:</p>
