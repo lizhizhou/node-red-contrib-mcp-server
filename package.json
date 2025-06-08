@@ -1,0 +1,64 @@
+{
+  "name": "node-red-contrib-mcp-server",
+  "version": "1.0.0",
+  "description": "A comprehensive Node-RED wrapper for Model Context Protocol (MCP) servers providing standardized AI agent tool interfaces, server lifecycle management, and real-time communication capabilities",
+  "main": "mcp-server.js",
+  "scripts": {
+    "test": "node test.js",
+    "prepublishOnly": "echo 'Ready to publish node-red-contrib-mcp-server'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MadnessEngineering/node-red-contrib-mcp-server.git"
+  },
+  "keywords": [
+    "node-red",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "agent",
+    "fastmcp",
+    "tools",
+    "server",
+    "sse",
+    "websocket",
+    "automation",
+    "madness",
+    "interactive",
+    "omnispindle",
+    "claude",
+    "anthropic"
+  ],
+  "author": "D. Edens <d.edens@todomill.dev>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MadnessEngineering/node-red-contrib-mcp-server/issues"
+  },
+  "homepage": "https://github.com/MadnessEngineering/node-red-contrib-mcp-server#readme",
+  "node-red": {
+    "nodes": {
+      "mcp-server": "mcp-server.js",
+      "mcp-client": "mcp-client.js",
+      "mcp-tool": "mcp-tool.js"
+    }
+  },
+  "dependencies": {
+    "node-cache": "^5.1.2",
+    "axios": "^1.6.0",
+    "ws": "^8.14.0",
+    "eventsource": "^2.0.2",
+    "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "peerDependencies": {
+    "node-red": ">=1.0.0"
+  },
+  "files": [
+    "*.js",
+    "*.html", 
+    "*.md",
+    "LICENSE"
+  ]
+} 
