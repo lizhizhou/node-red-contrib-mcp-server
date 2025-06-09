@@ -36,11 +36,7 @@
         "statusType": "auto",
         "x": 450,
         "y": 80,
-        "wires": [],
-        "filter": {
-            "property": "topic",
-            "value": "handshake"
-        }
+        "wires": []
     },
     {
         "id": "debug-responses",

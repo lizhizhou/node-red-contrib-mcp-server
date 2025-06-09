@@ -345,14 +345,15 @@ module.exports = function (RED)
                     node.isRunning = true;
                     node.status({ fill: "green", shape: "dot", text: `running :${node.serverPort}` });
 
-                    // Store in global registry
-                    serverInstances.set(node.serverId, {
-                        nodeId: node.id,
-                        serverName: node.serverName,
-                        port: node.serverPort,
-                        startTime: new Date(),
-                        isRunning: true
-                    });
+                    // Store in global registry - use only primitive values to avoid cloning issues
+                    const cacheData = {
+                        nodeId: String(node.id),
+                        serverName: String(node.serverName),
+                        port: Number(node.serverPort),
+                        startTime: new Date().toISOString(),
+                        isRunning: Boolean(true)
+                    };
+                    serverInstances.set(node.serverId, cacheData);
 
                     node.log(`MCP Flow Server started on port ${node.serverPort}`);
 

@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2024-12-28
+
+### Fixed - Critical Import Fix
+- **Example Flows**: Fixed Node-RED import crash during "Adding Flows to workspace"
+  - Removed invalid `filter` property from debug node in external-mcp-server-example.json
+  - The filter property was non-standard Node-RED syntax causing import failures
+  - All example flows now validated and import cleanly
+  - Prevents Node-RED crashes during flow import/workspace loading
+
+### Technical Details
+- Debug nodes should not have custom `filter` properties
+- Node-RED expects standard debug node configuration only
+- All example flows now pass JSON validation and Node-RED import validation
+
+## [1.1.4] - 2024-12-28
+
+### Fixed - Critical Bug Fix
+- **MCP Flow Server Node**: Fixed persistent NodeCache cloning error
+  - Replaced Date objects with ISO string timestamps in cache
+  - Ensured all cached values are primitive types only
+  - Explicitly converted all values to primitives (String, Number, Boolean)
+  - Eliminates "Cannot assign to read only property" errors that crash Node-RED
+  - Resolves the underlying cause that was still triggering clone library failures
+
+### Technical Details
+- Changed `startTime: new Date()` to `startTime: new Date().toISOString()`
+- Added explicit type conversion: `String(node.id)`, `Number(node.serverPort)`, etc.
+- Ensures NodeCache can safely clone all cached server instance data
+- Maintains all functionality while eliminating crash risk
+
 ## [1.1.3] - 2024-12-28
 
 ### Added
