@@ -90,6 +90,10 @@ module.exports = function (RED)
                         case 'initialize':
                             node.handleInitialize(request, res);
                             break;
+                        
+                        case 'notifications/initialized':
+                            node.handleInitialized(request, res);
+                            break;
 
                         default:
                             if (request.method && request.method.endsWith('_tool'))
@@ -275,6 +279,22 @@ module.exports = function (RED)
                 }
             });
         };
+
+        node.handleInitialized = function (request, res)
+        {
+            // This method can be used to notify the server that it has been initialized
+            // For now, we just acknowledge the request
+            res.json({
+                jsonrpc: "2.0",
+                id: request.id,
+                result: {
+                    message: "Server initialized successfully"
+                }
+            });
+
+            // Optionally, you can trigger any post-initialization logic here
+            node.log("Server initialized notification received");
+        }
 
         // Execute tool flow
         node.executeToolFlow = function (tool, args)
