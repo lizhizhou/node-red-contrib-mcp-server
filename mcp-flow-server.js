@@ -183,6 +183,7 @@ module.exports = function (RED)
         {
             const { name, arguments: args } = request.params;
             const tool = toolRegistry.get(name);
+            node.log(`Tool call request: ${name} with args: ${JSON.stringify(args)}`);
 
             if (!tool)
             {
@@ -200,6 +201,7 @@ module.exports = function (RED)
             try
             {
                 const result = await node.executeToolFlow(tool, args);
+                node.log(`Tool ${name} executed successfully with result: ${JSON.stringify(result)}`);
                 res.json({
                     jsonrpc: "2.0",
                     id: request.id,
