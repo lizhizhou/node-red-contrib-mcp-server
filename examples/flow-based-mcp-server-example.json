@@ -328,7 +328,7 @@
         "type": "mcp-client",
         "z": "mcp-flow-example",
         "name": "",
-        "serverUrl": "http://localhost:8099",
+        "serverUrl": "http://localhost:8001",
         "connectionType": "sse",
         "autoConnect": false,
         "reconnect": true,
